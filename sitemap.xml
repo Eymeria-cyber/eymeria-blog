@@ -2,77 +2,77 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/</loc>
+    <loc>http://localhost:1313/eymeria-blog/</loc>
     <lastmod>2024-09-17T17:47:06+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/p/hello-there/</loc>
+    <loc>http://localhost:1313/eymeria-blog/p/hello-there/</loc>
     <lastmod>2024-09-17T17:47:06+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/post/</loc>
+    <loc>http://localhost:1313/eymeria-blog/post/</loc>
     <lastmod>2024-09-17T17:47:06+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/archives/</loc>
+    <loc>http://localhost:1313/eymeria-blog/archives/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/page/</loc>
+    <loc>http://localhost:1313/eymeria-blog/page/</loc>
     <lastmod>2020-10-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/categories/</loc>
+    <loc>http://localhost:1313/eymeria-blog/categories/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/tags/css/</loc>
+    <loc>http://localhost:1313/eymeria-blog/tags/css/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/tags/html/</loc>
+    <loc>http://localhost:1313/eymeria-blog/tags/html/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/tags/markdown/</loc>
+    <loc>http://localhost:1313/eymeria-blog/tags/markdown/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/p/markdown-syntax-guide/</loc>
+    <loc>http://localhost:1313/eymeria-blog/p/markdown-syntax-guide/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/categories/syntax/</loc>
+    <loc>http://localhost:1313/eymeria-blog/categories/syntax/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/tags/</loc>
+    <loc>http://localhost:1313/eymeria-blog/tags/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/tags/themes/</loc>
+    <loc>http://localhost:1313/eymeria-blog/tags/themes/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/categories/themes/</loc>
+    <loc>http://localhost:1313/eymeria-blog/categories/themes/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/p/placeholder-text/</loc>
+    <loc>http://localhost:1313/eymeria-blog/p/placeholder-text/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/tags/tag-with-whitespaces/</loc>
+    <loc>http://localhost:1313/eymeria-blog/tags/tag-with-whitespaces/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/categories/test/</loc>
+    <loc>http://localhost:1313/eymeria-blog/categories/test/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/categories/test-with-whitespaces/</loc>
+    <loc>http://localhost:1313/eymeria-blog/categories/test-with-whitespaces/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/tags/text/</loc>
+    <loc>http://localhost:1313/eymeria-blog/tags/text/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/p/math-typesetting/</loc>
+    <loc>http://localhost:1313/eymeria-blog/p/math-typesetting/</loc>
     <lastmod>2019-03-08T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/tags/emoji/</loc>
+    <loc>http://localhost:1313/eymeria-blog/tags/emoji/</loc>
     <lastmod>2019-03-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/p/emoji-support/</loc>
+    <loc>http://localhost:1313/eymeria-blog/p/emoji-support/</loc>
     <lastmod>2019-03-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/about/</loc>
+    <loc>http://localhost:1313/eymeria-blog/about/</loc>
     <lastmod>2020-10-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/links/</loc>
+    <loc>http://localhost:1313/eymeria-blog/links/</loc>
   </url><url>
-    <loc>http://localhost:1313/Eymeria-cyber/eymeria-blog/search/</loc>
+    <loc>http://localhost:1313/eymeria-blog/search/</loc>
   </url>
 </urlset>
