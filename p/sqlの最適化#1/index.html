@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="1.インデックスの利用 インデックスの作成： よく使用する列（特に WHERE 句、JOIN、GROUP BY、ORDER BY に使用される列）にインデックスを追加します。\n1. WHERE 句にインデックスを追加する例 例えば、users テーブルがあり、ユーザー ID に基づいてユーザーを検索するクエリが頻繁に実行される場合、user_id 列にインデックスを作成することでクエリの速度が向上します。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 -- テーブル構造の例 CREATE TABLE users ( user_id INT, name VARCHAR(100), age INT, email VARCHAR(100), PRIMARY KEY (user_id) ); -- インデックスの作成 CREATE INDEX idx_user_id ON users(user_id); -- 最適化されるクエリの例 SELECT * FROM users WHERE user_id = 123; 上記のクエリでは、user_id にインデックスがあることで、データベースはテーブル全体をスキャンせずに、インデックスを使って素早く結果を取得できます。\n">
+<title>SQLの最適化#1</title>
+
+<link rel='canonical' href='https://eymeria-cyber.github.io/eymeria-blog/p/sql%E3%81%AE%E6%9C%80%E9%81%A9%E5%8C%96%231/'>
+
+<link rel="stylesheet" href="/eymeria-blog/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="SQLの最適化#1">
+<meta property='og:description' content="1.インデックスの利用 インデックスの作成： よく使用する列（特に WHERE 句、JOIN、GROUP BY、ORDER BY に使用される列）にインデックスを追加します。\n1. WHERE 句にインデックスを追加する例 例えば、users テーブルがあり、ユーザー ID に基づいてユーザーを検索するクエリが頻繁に実行される場合、user_id 列にインデックスを作成することでクエリの速度が向上します。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 -- テーブル構造の例 CREATE TABLE users ( user_id INT, name VARCHAR(100), age INT, email VARCHAR(100), PRIMARY KEY (user_id) ); -- インデックスの作成 CREATE INDEX idx_user_id ON users(user_id); -- 最適化されるクエリの例 SELECT * FROM users WHERE user_id = 123; 上記のクエリでは、user_id にインデックスがあることで、データベースはテーブル全体をスキャンせずに、インデックスを使って素早く結果を取得できます。\n">
+<meta property='og:url' content='https://eymeria-cyber.github.io/eymeria-blog/p/sql%E3%81%AE%E6%9C%80%E9%81%A9%E5%8C%96%231/'>
+<meta property='og:site_name' content='Eymeria'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2024-09-26T00:12:09&#43;08:00'/><meta property='article:modified_time' content='2024-09-26T00:12:09&#43;08:00'/>
+<meta name="twitter:title" content="SQLの最適化#1">
+<meta name="twitter:description" content="1.インデックスの利用 インデックスの作成： よく使用する列（特に WHERE 句、JOIN、GROUP BY、ORDER BY に使用される列）にインデックスを追加します。\n1. WHERE 句にインデックスを追加する例 例えば、users テーブルがあり、ユーザー ID に基づいてユーザーを検索するクエリが頻繁に実行される場合、user_id 列にインデックスを作成することでクエリの速度が向上します。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 -- テーブル構造の例 CREATE TABLE users ( user_id INT, name VARCHAR(100), age INT, email VARCHAR(100), PRIMARY KEY (user_id) ); -- インデックスの作成 CREATE INDEX idx_user_id ON users(user_id); -- 最適化されるクエリの例 SELECT * FROM users WHERE user_id = 123; 上記のクエリでは、user_id にインデックスがあることで、データベースはテーブル全体をスキャンせずに、インデックスを使って素早く結果を取得できます。\n">
+    <link rel="shortcut icon" href="/eymeria-blog/ico/favicon.ico" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/eymeria-blog/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/eymeria-blog/img/avatar_hu13591554266208752758.jfif" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/eymeria-blog">Eymeria</a></h1>
+            <h2 class="site-description">Welcome to this space, where I will document my life and studies. I hope you&#39;ll enjoy the articles I share.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/9153371'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-brand-bilibili"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" /><path d="M8 3l2 3" /><path d="M16 3l-2 3" /><path d="M9 13v-2" /><path d="M15 11v2" /></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/Eymeria-cyber'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com/EymeriaYusa'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/eymeria-blog/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/eymeria-blog/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/eymeria-blog/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/eymeria-blog/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li>
+      <ol>
+        <li><a href="#1インデックスの利用">1.インデックスの利用</a>
+          <ol>
+            <li><a href="#インデックスの作成">インデックスの作成：</a></li>
+            <li><a href="#インデックスの種類">インデックスの種類:</a></li>
+            <li><a href="#2-不必要なクエリを避ける">2. 不必要なクエリを避ける</a></li>
+            <li><a href="#3-クエリの書き方を工夫する">3. クエリの書き方を工夫する</a></li>
+            <li><a href="#4-データベース設計の見直し">4. データベース設計の見直し</a></li>
+            <li><a href="#5-クエリの実行計画を確認">5. クエリの実行計画を確認</a></li>
+            <li><a href="#6-トランザクションの最適化">6. トランザクションの最適化</a></li>
+            <li><a href="#7-キャッシュの利用">7. キャッシュの利用</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/eymeria-blog/p/sql%E3%81%AE%E6%9C%80%E9%81%A9%E5%8C%96%231/">SQLの最適化#1</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2024-09-26</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h3 id="1インデックスの利用">1.インデックスの利用
+</h3><h4 id="インデックスの作成">インデックスの作成：
+</h4><p>よく使用する列（特に WHERE 句、JOIN、GROUP BY、ORDER BY に使用される列）にインデックスを追加します。</p>
+<h5 id="1-where-句にインデックスを追加する例">1. WHERE 句にインデックスを追加する例
+</h5><p>例えば、users テーブルがあり、ユーザー ID に基づいてユーザーを検索するクエリが頻繁に実行される場合、user_id 列にインデックスを作成することでクエリの速度が向上します。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-SQL" data-lang="SQL"><span class="line"><span class="cl"><span class="c1">-- テーブル構造の例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">user_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">age</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">email</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- インデックスの作成
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_user_id</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">users</span><span class="p">(</span><span class="n">user_id</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- 最適化されるクエリの例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>上記のクエリでは、user_id にインデックスがあることで、データベースはテーブル全体をスキャンせずに、インデックスを使って素早く結果を取得できます。</p>
+<h5 id="2-join-句で使用される列にインデックスを追加する例">2. JOIN 句で使用される列にインデックスを追加する例
+</h5><p>異なるテーブル間で結合（JOIN）を行う場合、結合に使用される列にインデックスを設定すると、クエリのパフォーマンスが向上します。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-SQL" data-lang="SQL"><span class="line"><span class="cl"><span class="c1">-- テーブル構造の例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">order_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">user_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">product_name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">order_date</span><span class="w"> </span><span class="nb">DATE</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">order_id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- JOINに使用されるuser_idにインデックスを作成
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_orders_user_id</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">orders</span><span class="p">(</span><span class="n">user_id</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- 最適化されるJOINクエリの例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">product_name</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="n">u</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">JOIN</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="n">o</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">user_id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>ここでは、orders テーブルの user_id にインデックスを作成することで、結合のパフォーマンスが向上します。</p>
+<h5 id="3-group-by-句に使用される列にインデックスを追加する例">3. GROUP BY 句に使用される列にインデックスを追加する例
+</h5><p>GROUP BY 句で使用される列にもインデックスを設定することで、グループ化の処理が高速化されます。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-SQL" data-lang="SQL"><span class="line"><span class="cl"><span class="c1">-- テーブル構造の例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">sales</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">sale_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">product_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">amount</span><span class="w"> </span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">sale_date</span><span class="w"> </span><span class="nb">DATE</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">sale_id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- product_idにインデックスを作成
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_sales_product_id</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">sales</span><span class="p">(</span><span class="n">product_id</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- 最適化されるクエリの例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">product_id</span><span class="p">,</span><span class="w"> </span><span class="k">SUM</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">sales</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">product_id</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>インデックスの作成によってクエリの速度が改善されますが、インデックスの作成はデータベースの書き込み操作に影響を与えることもあるため、適切な列にのみインデックスを付与することが重要です。</p>
+<h4 id="インデックスの種類">インデックスの種類:
+</h4><p>適切なインデックスの種類（B-tree、ハッシュ、全文インデックスなど）を選択し、パフォーマンス向上に役立てます。</p>
+<h5 id="1-b-tree-インデックス">1. B-tree インデックス
+</h5><p>B-tree（Balanced Tree）インデックスは、最も一般的で広く使用されるインデックスの種類です。主に WHERE 句、ORDER BY、GROUP BY、JOIN などでの検索やソートに最適です。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-SQL" data-lang="SQL"><span class="line"><span class="cl"><span class="c1">-- テーブル構造
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">employees</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">employee_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">salary</span><span class="w"> </span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">hire_date</span><span class="w"> </span><span class="nb">DATE</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">employee_id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- hire_dateにB-treeインデックスを作成
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_hire_date</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">employees</span><span class="p">(</span><span class="n">hire_date</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- B-treeインデックスが効くクエリ例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">employees</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">hire_date</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="s1">&#39;2022-01-01&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">hire_date</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>適用シナリオ:</p>
+<ul>
+<li>範囲検索（&gt;, &lt;, BETWEEN など）</li>
+<li>並べ替えやグループ化が必要な場合</li>
+<li>複数の異なる値を持つ列</li>
+</ul>
+<h5 id="2-ハッシュインデックス">2. ハッシュインデックス
+</h5><p>ハッシュインデックスは、キーとそのデータのアドレスをマッピングするハッシュテーブルを使用します。このインデックスは、完全一致検索に非常に高速ですが、範囲検索やソートには使用できません。</p>
+<p>例:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- テーブル構造
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">sessions</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">session_id</span><span class="w"> </span><span class="nb">CHAR</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">user_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">start_time</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">session_id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- session_idにハッシュインデックスを作成 (PostgreSQLなどでの例)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_session_id_hash</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">sessions</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="n">HASH</span><span class="w"> </span><span class="p">(</span><span class="n">session_id</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- ハッシュインデックスが効くクエリ例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">sessions</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">session_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;abc123xyz&#39;</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>適用シナリオ:</p>
+<ul>
+<li>完全一致検索 (=)が頻繁な場合</li>
+<li>範囲検索や順序付けが不要な場合</li>
+</ul>
+<h5 id="3-全文インデックスfull-text-index">3. 全文インデックス（Full-Text Index）
+</h5><p>全文インデックスは、テキストベースの検索を高速化するために使用されます。主に長いテキストや文章内のキーワード検索で性能を発揮します。</p>
+<p>例:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- テーブル構造
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">articles</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">article_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">title</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">200</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">content</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">article_id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- contentに全文インデックスを作成
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="n">FULLTEXT</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_content_fulltext</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">articles</span><span class="p">(</span><span class="n">content</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- 全文インデックスが効くクエリ例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">articles</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="k">MATCH</span><span class="p">(</span><span class="n">content</span><span class="p">)</span><span class="w"> </span><span class="n">AGAINST</span><span class="p">(</span><span class="s1">&#39;SQL optimization&#39;</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>適用シナリオ:</p>
+<ul>
+<li>長いテキストや文章データ内のキーワード検索</li>
+<li>ニュース記事やブログ投稿の検索</li>
+</ul>
+<h5 id="4-gist-インデックスgeneralized-search-tree">4. GiST インデックス（Generalized Search Tree）
+</h5><p>GiST インデックスは、空間検索や近似検索など、より複雑なクエリに使用される汎用的なツリーインデックスです。</p>
+<p>例:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- テーブル構造（PostGISなどの拡張を使用した地理データ）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">locations</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">location_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">coordinates</span><span class="w"> </span><span class="n">GEOGRAPHY</span><span class="p">(</span><span class="n">Point</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">location_id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- coordinatesにGiSTインデックスを作成
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_coordinates_gist</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">locations</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="n">GIST</span><span class="w"> </span><span class="p">(</span><span class="n">coordinates</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- GiSTインデックスが効くクエリ例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">locations</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">ST_DWithin</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;POINT(139.6917 35.6895)&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">10000</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>適用シナリオ:</p>
+<ul>
+<li>空間データや地理情報の検索</li>
+<li>近傍検索や範囲検索</li>
+</ul>
+<h5 id="5-逆順descendingインデックス">5. 逆順（Descending）インデックス
+</h5><p>逆順インデックスは、降順に最適化されたインデックスです。主に ORDER BY &hellip; DESC のクエリで使用されます。</p>
+<p>例:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- テーブル構造
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">transactions</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">transaction_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">amount</span><span class="w"> </span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">transaction_date</span><span class="w"> </span><span class="nb">DATE</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">transaction_id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- transaction_dateに逆順インデックスを作成
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_transaction_date_desc</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">transactions</span><span class="p">(</span><span class="n">transaction_date</span><span class="w"> </span><span class="k">DESC</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- 逆順インデックスが効くクエリ例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">transactions</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">transaction_date</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>適用シナリオ:</p>
+<ul>
+<li>降順でのソートが頻繁な場合</li>
+</ul>
+<p>各インデックスには、それぞれの特性に合わせた用途があります。クエリのパフォーマンス向上のために、適切なインデックスを選んで使用することが重要です。</p>
+<h4 id="2-不必要なクエリを避ける">2. 不必要なクエリを避ける
+</h4><ul>
+<li>SELECT *を避ける: 必要な列のみを指定します。SELECT *は不要なデータの取得を引き起こし、パフォーマンスに悪影響を与えます。</li>
+<li>サブクエリの代わりに結合を使用する: サブクエリは計算負荷が高くなる場合があります。JOIN を使用してパフォーマンスを向上させましょう。</li>
+</ul>
+<p><strong><em>例えば：</em></strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- 商品ごとの最新の注文日を取得するサブクエリの例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">product_id</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">product_name</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">       </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="k">MAX</span><span class="p">(</span><span class="n">order_date</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="n">o</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">product_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">product_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">last_order_date</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">products</span><span class="w"> </span><span class="n">p</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong><em>これを JOIN で書き換えると以下のようになります。</em></strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- JOINを使用して最新の注文日を取得する
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">product_id</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">product_name</span><span class="p">,</span><span class="w"> </span><span class="k">MAX</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">order_date</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">last_order_date</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">products</span><span class="w"> </span><span class="n">p</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="n">o</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">product_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">product_id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">product_id</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">product_name</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong><em>この方法のメリット:</em></strong></p>
+<ul>
+<li>MAX()関数と JOIN を組み合わせることで、全てのデータを一度に集計できます。</li>
+<li>サブクエリを何度も実行する必要がなく、効率的に動作します。</li>
+</ul>
+<p><strong><em>まとめ</em></strong></p>
+<ul>
+<li>サブクエリは、各行に対して複数回実行される場合があり、データ量が増えるとパフォーマンスが悪化しやすいです。</li>
+<li>JOIN は、テーブル全体を結合してから集計を行うため、一度の処理で効率的に結果を得られます。</li>
+<li>JOIN を用いた書き方は、特に大量データ処理において計算負荷を軽減し、パフォーマンスを向上させる効果があります。</li>
+</ul>
+<p>このように、サブクエリを JOIN に置き換えることで、より効率的なクエリを実現できます。</p>
+<h4 id="3-クエリの書き方を工夫する">3. クエリの書き方を工夫する
+</h4><ul>
+<li>WHERE 句の最適化: クエリの実行時にフィルター条件を最適化します。例えば、OR よりも UNION を使う方が効率的な場合があります。</li>
+<li>LIKE 句の最適化: ワイルドカード（例えば%）の使用を最小限にし、インデックスを活用できるようにします。</li>
+</ul>
+<p><code>WHERE</code> 句の最適化は、クエリのパフォーマンスを向上させるために非常に重要です。特に OR 条件を含むクエリは、パフォーマンスに悪影響を与える場合があります。OR の代わりに UNION を使用することで、クエリの実行効率を改善できるケースがあります。以下に、その具体的な例を示します。</p>
+<p><strong><em>OR を使用した非効率なクエリの例</em></strong></p>
+<p>以下の例では、employees テーブルから特定の部署の従業員を取得するクエリです。このクエリは、department_id が 1 または 2 の従業員を取得します。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- テーブル構造の例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">employees</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">employee_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">department_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">employee_id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- ORを使用したクエリ
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">employees</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">department_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">employee_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>問題点:</strong></p>
+<ul>
+<li>OR employee_id 列と department_id 列にはそれぞれ独立したインデックスがあります。MySQL に例として通常で、1 つのクエリ内で各テーブルに対して 1 つのインデックスしか使用しません。この場合、どのインデックスを使用すべきでしょうか？もし department_id のインデックスを使用すると、1 にある行を見つけるためにテーブルスキャンを実行しなければなりません。一方、city のインデックスを使用すると、employee_id が 2 である行に対してテーブルスキャンを行う必要があります。</li>
+</ul>
+<p><strong><em>UNION ソリューションはこのようなケースに適しています。</em></strong></p>
+<p><code>OR</code> の代わりに <code>UNION</code> を使用することで、クエリを分割して実行でき、インデックスが効果的に利用されることが多いです。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- UNIONを使用したクエリ
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">employees</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">department_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">UNION</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">employees</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">employee_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>このようにすれば、各サブクエリがそれぞれのインデックスを使用して検索を行い、その後、サブクエリの結果を結合します。
+<strong><em>なぜ<code>UNION</code>が効率的なのか？</em></strong></p>
+<p><strong>1.インデックスの使用:</strong></p>
+<ul>
+<li>OR 条件はインデックスの最適利用を妨げることがあるのに対し、UNION ではそれぞれの SELECT 文が個別に実行され、インデックスを利用しやすくなります。</li>
+</ul>
+<p><strong>2.フルテーブルスキャンの回避:</strong></p>
+<ul>
+<li>OR の場合、テーブル全体をスキャンする可能性があるが、UNION はインデックスを使い、部分的なスキャンで済みます。</li>
+</ul>
+<p><strong><em>別のケース：範囲条件の最適化</em></strong></p>
+<p>他の参考：<a class="link" href="https://stackoverflow.com/questions/13750475/sql-performance-union-vs-o"  target="_blank" rel="noopener"
+    >SQL Performance UNION vs OR</a></p>
+<p><strong><em><code>UNION ALL</code>と<code>UNION</code>の違い</em></strong></p>
+<ul>
+<li><code>UNION ALL</code>は結果セットをそのまま結合するため、重複を排除せず、高速です。</li>
+<li><code>UNION</code>は重複する行を削除するため、その分パフォーマンスに影響が出る可能性があります。</li>
+</ul>
+<p><strong><em>最適化のポイント</em></strong></p>
+<ul>
+<li>データが重複しないことが確実であれば、UNION より UNION ALL を選びましょう。UNION ALL は重複排除を行わないため、より高速です。</li>
+<li>インデックスの使用を最大化するために、UNION や UNION ALL を適切に利用し、クエリの効率を高めることができます。</li>
+</ul>
+<p>UNION を使用することで、特定のクエリの実行パフォーマンスを大幅に向上させることが可能です。状況に応じてこれらの手法を使い分けると良いでしょう。</p>
+<h4 id="4-データベース設計の見直し">4. データベース設計の見直し
+</h4><ul>
+<li>正規化と非正規化のバランス: データの重複を減らすための正規化は大事ですが、アクセス頻度の高いデータは非正規化してアクセスを高速化することもあります。</li>
+<li>パーティショニング: 大きなテーブルをパーティションに分割することで、クエリパフォーマンスを向上させることができます。</li>
+</ul>
+<h4 id="5-クエリの実行計画を確認">5. クエリの実行計画を確認
+</h4><ul>
+<li>EXPLAIN の使用: クエリの実行計画を確認し、インデックスの使用状況やテーブルスキャンが発生していないかをチェックします。</li>
+</ul>
+<h4 id="6-トランザクションの最適化">6. トランザクションの最適化
+</h4><ul>
+<li>トランザクションの範囲を最小限に: トランザクションの範囲が大きいとロックが発生しやすくなります。トランザクションを小さくし、コミットを適切に行うようにします。</li>
+</ul>
+<h4 id="7-キャッシュの利用">7. キャッシュの利用
+</h4><ul>
+<li>クエリキャッシュ: 頻繁に実行されるクエリはキャッシュすることで、再実行時のパフォーマンスが向上します（ただし、キャッシュの適用はシナリオによります）。</li>
+</ul>
+<p>これらの方法を活用し、SQL クエリのパフォーマンスを向上させましょう。最適化のアプローチは、データベースの種類や具体的なクエリ内容により異なる場合があるため、実際の状況に合わせて調整してください。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+  <section class="copyright">
+    &copy;  2024 Eymeria Person
+  </section>
+
+  <section class="powerby">
+    Built with <a
+      href="https://gohugo.io/"
+      target="_blank"
+      rel="noopener"
+      >Hugo</a
+    >
+    <br />
+    Theme <b
+      ><a
+        href="https://github.com/CaiJimmy/hugo-theme-stack"
+        target="_blank"
+        rel="noopener"
+        data-version="3.27.0"
+        >Stack</a
+      ></b
+    > designed by <a
+      href="https://jimmycai.com"
+      target="_blank"
+      rel="noopener"
+      >Jimmy</a
+    >
+  </section>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/live2d-render@0.0.5/bundle.js"></script>
+<script>
+  Live2dRender.initializeLive2D({
+    
+    BackgroundRGBA: [0.0, 0.0, 0.0, 0.0],
+
+    
+    ResourcesPath: './live2D/cat/sdwhite cat free.model3.json',
+
+    
+    CanvasSize: {
+      height: 300,
+      width: 200,
+    },
+
+    ShowToolBox: false,
+
+    
+    LoadFromCache: true,
+  }).then(() => {
+    console.log('finish load')
+  })
+</script>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/eymeria-blog/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
